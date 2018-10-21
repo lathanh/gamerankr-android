@@ -1,0 +1,13 @@
+#== Build System and Outputs
+/.gradle/
+/build/
+
+#== Local development
+/local.properties
+
+#== IDEs & Editors
+/*.iml
+/.idea/
+
+#== OS-specific lint
+.DS_Store

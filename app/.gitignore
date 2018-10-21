@@ -1,0 +1,5 @@
+#== Build System and Outputs
+/build/
+
+#== IDEs & Editors
+/*.iml

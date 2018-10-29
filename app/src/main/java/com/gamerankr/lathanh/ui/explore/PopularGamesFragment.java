@@ -88,7 +88,8 @@ public class PopularGamesFragment extends Fragment {
         List<PopularGamesQuery.Game> popularGames = response.data().games();
         for (PopularGamesQuery.Game popularGame : popularGames) {
           GameBasic game = popularGame.fragments().gameBasic();
-          GameRecyclerViewAdapter.GameItem gameItem = new GameRecyclerViewAdapter.GameItem(game.id(), game.title(), game.url());
+          GameRecyclerViewAdapter.GameItem gameItem =
+              new GameRecyclerViewAdapter.GameItem(game.id(), game.title(), game.url());
           popularGameItems.add(gameItem);
         }
 

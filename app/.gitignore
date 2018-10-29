@@ -1,4 +1,5 @@
 #== Build System and Outputs
+/.gradle/
 /build/
 
 #== IDEs & Editors

@@ -1,5 +1,6 @@
 package com.gamerankr.lathanh.ui.explore;
 
+import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -55,7 +56,7 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
   /**
    * A dummy item representing a piece of content.
    */
-  public static class GameItem {
+  public static class GameItem extends ViewModel {
     public final String id;
     public final String title;
     public final String url;

@@ -1,8 +1,14 @@
 package com.gamerankr.lathanh.ui.explore;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -70,47 +76,24 @@ public class PopularGamesFragment extends Fragment {
     final GameRecyclerViewAdapter adapter = new GameRecyclerViewAdapter(popularGameItems, mListener);
     recyclerView.setAdapter(adapter);
 
-    ApolloClient apolloClient =
-        ApolloClient.builder()
-            .serverUrl("https://www.gamerankr.com/graphql")
-            .logger(new Logger() {
-              @Override
-              public void log(int priority, @NotNull String message, @NotNull Optional<Throwable> t, @NotNull Object... args) {
-              }
-            })
-            .build();
-    ApolloQueryCall<PopularGamesQuery.Data> query =
-        apolloClient.query(
-            PopularGamesQuery.builder().build());
-    query.enqueue(new ApolloCall.Callback<PopularGamesQuery.Data>() {
+    // Popular games view model
+    PopularGamesViewModel viewModel =
+        ViewModelProviders.of(this).get(PopularGamesViewModel.class);
+    viewModel.getPopularGames().observe(this, new Observer<List<GameBasic>>() {
       @Override
-      public void onResponse(@NotNull Response<PopularGamesQuery.Data> response) {
-        List<PopularGamesQuery.Game> popularGames = response.data().games();
-        for (PopularGamesQuery.Game popularGame : popularGames) {
-          GameBasic game = popularGame.fragments().gameBasic();
+      public void onChanged(@Nullable List<GameBasic> gameBasics) {
+        for (GameBasic game : gameBasics) {
           GameRecyclerViewAdapter.GameItem gameItem =
               new GameRecyclerViewAdapter.GameItem(game.id(), game.title(), game.url());
           popularGameItems.add(gameItem);
         }
 
-        getActivity().runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            adapter.notifyDataSetChanged();
-          }
-        });
-      }
-
-
-      @Override
-      public void onFailure(@NotNull ApolloException e) {
-
+        adapter.notifyDataSetChanged();
       }
     });
 
     return view;
   }
-
 
   @Override
   public void onAttach(Context context) {
@@ -127,6 +110,57 @@ public class PopularGamesFragment extends Fragment {
     super.onDetach();
     mListener = null;
   }
+
+  public static class PopularGamesViewModel extends ViewModel {
+    private MutableLiveData<List<GameBasic>> games;
+
+    public PopularGamesViewModel() {
+    }
+
+    public LiveData<List<GameBasic>> getPopularGames() {
+      if (games == null) {
+        games = new MutableLiveData<>();
+        loadPopularGames();
+      }
+      return games;
+    }
+
+    private void loadPopularGames() {
+      ApolloClient apolloClient =
+          ApolloClient.builder()
+              .serverUrl("https://www.gamerankr.com/graphql")
+              .logger(new Logger() {
+                @Override
+                public void log(int priority, @NotNull String message,
+                                @NotNull Optional<Throwable> t, @NotNull Object... args) {
+                  Log.println(priority, "PopularGamesFrag", String.format(message, args));
+                }
+              })
+              .build();
+      ApolloQueryCall<PopularGamesQuery.Data> query =
+          apolloClient.query(
+              PopularGamesQuery.builder().build());
+      query.enqueue(new ApolloCall.Callback<PopularGamesQuery.Data>() {
+        @Override
+        public void onResponse(@NotNull Response<PopularGamesQuery.Data> response) {
+          List<PopularGamesQuery.Game> popularGames = response.data().games();
+          List<GameBasic> gameBasicList = new ArrayList<>(popularGames.size());
+          for (PopularGamesQuery.Game popularGame : popularGames) {
+            GameBasic game = popularGame.fragments().gameBasic();
+            gameBasicList.add(game);
+          }
+
+          games.postValue(gameBasicList);
+        }
+
+        @Override
+        public void onFailure(@NotNull ApolloException e) {
+          // TODO-XXXX
+          Log.e("PopularGamesFrag", "onFailure", e);
+        }
+      });
+    } // loadPopularGames()
+  } // class PopularGamesViewModel
 
   /**
    * This interface must be implemented by activities that contain this

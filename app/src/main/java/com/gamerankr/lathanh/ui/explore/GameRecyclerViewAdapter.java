@@ -1,28 +1,26 @@
 package com.gamerankr.lathanh.ui.explore;
 
-import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.gamerankr.lathanh.databinding.GameListItemBinding;
-import com.gamerankr.lathanh.ui.explore.PopularGamesFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link GameItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
+ * specified {@link PopularGamesFragment.InteractionListener}.
  */
 public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerViewAdapter.ViewHolder> {
 
-  private final List<GameItem> mValues;
-  private final OnListFragmentInteractionListener mListener;
+  private final List<GameItem> gameItems;
+  private final PopularGamesFragment.InteractionListener interactionListener;
 
-  public GameRecyclerViewAdapter(List<GameItem> items, OnListFragmentInteractionListener listener) {
-    mValues = items;
-    mListener = listener;
+  public GameRecyclerViewAdapter(List<GameItem> items, PopularGamesFragment.InteractionListener listener) {
+    this.gameItems = items;
+    this.interactionListener = listener;
   }
 
   @NonNull
@@ -36,12 +34,12 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
 
   @Override
   public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-    holder.gameListItemBinding.setGameItem(mValues.get(position));
+    holder.gameListItemBinding.setGameItem(gameItems.get(position));
   }
 
   @Override
   public int getItemCount() {
-    return mValues.size();
+    return gameItems.size();
   }
 
   public class ViewHolder extends RecyclerView.ViewHolder {
@@ -56,15 +54,21 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
   /**
    * A dummy item representing a piece of content.
    */
-  public static class GameItem extends ViewModel {
+  public static class GameItem {
+    private final GameRecyclerViewAdapter adapter;
     public final String id;
     public final String title;
     public final String url;
 
-    public GameItem(String id, String title, String url) {
+    public GameItem(GameRecyclerViewAdapter adapter, String id, String title, String url) {
+      this.adapter = adapter;
       this.id = id;
       this.title = title;
       this.url = url;
+    }
+
+    public void onClickListener() {
+      adapter.interactionListener.onGameItemChosen(this);
     }
   }
 }

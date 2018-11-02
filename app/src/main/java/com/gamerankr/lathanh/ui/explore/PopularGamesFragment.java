@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class PopularGamesFragment extends Fragment {
 
-  private OnListFragmentInteractionListener mListener;
+  private InteractionListener interactionListener;
 
 
   //== Instantiation =========================================================
@@ -59,11 +59,6 @@ public class PopularGamesFragment extends Fragment {
   //== Instance methods ======================================================
 
   @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-  }
-
-  @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_popular_games, container, false);
@@ -73,7 +68,8 @@ public class PopularGamesFragment extends Fragment {
     Context context = view.getContext();
     RecyclerView recyclerView = (RecyclerView) view;
     recyclerView.setLayoutManager(new LinearLayoutManager(context));
-    final GameRecyclerViewAdapter adapter = new GameRecyclerViewAdapter(popularGameItems, mListener);
+    final GameRecyclerViewAdapter adapter =
+        new GameRecyclerViewAdapter(popularGameItems, interactionListener);
     recyclerView.setAdapter(adapter);
 
     // Popular games view model
@@ -84,7 +80,7 @@ public class PopularGamesFragment extends Fragment {
       public void onChanged(@Nullable List<GameBasic> gameBasics) {
         for (GameBasic game : gameBasics) {
           GameRecyclerViewAdapter.GameItem gameItem =
-              new GameRecyclerViewAdapter.GameItem(game.id(), game.title(), game.url());
+              new GameRecyclerViewAdapter.GameItem(adapter, game.id(), game.title(), game.url());
           popularGameItems.add(gameItem);
         }
 
@@ -98,18 +94,21 @@ public class PopularGamesFragment extends Fragment {
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
-    if (context instanceof OnListFragmentInteractionListener) {
-      mListener = (OnListFragmentInteractionListener) context;
+    if (context instanceof InteractionListener) {
+      interactionListener = (InteractionListener) context;
     } else {
-      Log.e("PopularGamesFrag", context.toString() + " must implement OnListFragmentInteractionListener");
+      Log.e("PopularGamesFrag", context.toString() + " must implement InteractionListener");
     }
   }
 
   @Override
   public void onDetach() {
     super.onDetach();
-    mListener = null;
+    interactionListener = null;
   }
+
+
+  //== Nested classes ========================================================
 
   public static class PopularGamesViewModel extends ViewModel {
     private MutableLiveData<List<GameBasic>> games;
@@ -172,7 +171,7 @@ public class PopularGamesFragment extends Fragment {
    * "http://developer.android.com/training/basics/fragments/communicating.html"
    * >Communicating with Other Fragments</a> for more information.
    */
-  public interface OnListFragmentInteractionListener {
-    void onListFragmentInteraction(GameRecyclerViewAdapter.GameItem item);
+  public interface InteractionListener {
+    void onGameItemChosen(GameRecyclerViewAdapter.GameItem item);
   }
 }

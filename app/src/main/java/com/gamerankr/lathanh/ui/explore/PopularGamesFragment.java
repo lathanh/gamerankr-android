@@ -20,18 +20,20 @@ import android.view.ViewGroup;
 import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.ApolloQueryCall;
-import com.apollographql.apollo.Logger;
 import com.apollographql.apollo.api.Response;
-import com.apollographql.apollo.api.internal.Optional;
 import com.apollographql.apollo.exception.ApolloException;
 import com.gamerankr.fragment.GameBasic;
 import com.gamerankr.lathanh.R;
+import com.gamerankr.lathanh.app.dagger2.components.DaggerViewModelComponent;
+import com.gamerankr.lathanh.app.dagger2.components.ViewModelComponent;
 import com.gamerankr.queries.PopularGamesQuery;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * A fragment for showing the list of popular games.
@@ -111,10 +113,24 @@ public class PopularGamesFragment extends Fragment {
   //== Nested classes ========================================================
 
   public static class PopularGamesViewModel extends ViewModel {
+
+    //-- Dependencies --------------------------------------------------------
+
+    @Inject
+    ApolloClient apolloClient;
+
+    //-- Operating fields ----------------------------------------------------
+
     private MutableLiveData<List<GameBasic>> games;
 
+    //== Instantiation =======================================================
+
     public PopularGamesViewModel() {
+      ViewModelComponent component = DaggerViewModelComponent.builder().build();
+      component.inject(this);
     }
+
+    //== Instance methods ======================================================
 
     public LiveData<List<GameBasic>> getPopularGames() {
       if (games == null) {
@@ -125,17 +141,6 @@ public class PopularGamesFragment extends Fragment {
     }
 
     private void loadPopularGames() {
-      ApolloClient apolloClient =
-          ApolloClient.builder()
-              .serverUrl("https://www.gamerankr.com/graphql")
-              .logger(new Logger() {
-                @Override
-                public void log(int priority, @NotNull String message,
-                                @NotNull Optional<Throwable> t, @NotNull Object... args) {
-                  Log.println(priority, "PopularGamesFrag", String.format(message, args));
-                }
-              })
-              .build();
       ApolloQueryCall<PopularGamesQuery.Data> query =
           apolloClient.query(
               PopularGamesQuery.builder().build());

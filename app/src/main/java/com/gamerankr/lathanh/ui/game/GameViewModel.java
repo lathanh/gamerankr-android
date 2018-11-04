@@ -8,17 +8,36 @@ import android.util.Log;
 import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.ApolloQueryCall;
-import com.apollographql.apollo.Logger;
 import com.apollographql.apollo.api.Response;
-import com.apollographql.apollo.api.internal.Optional;
 import com.apollographql.apollo.exception.ApolloException;
+import com.gamerankr.lathanh.app.dagger2.components.DaggerViewModelComponent;
+import com.gamerankr.lathanh.app.dagger2.components.ViewModelComponent;
 import com.gamerankr.queries.GameQuery;
 
 import org.jetbrains.annotations.NotNull;
 
+import javax.inject.Inject;
+
 public class GameViewModel extends ViewModel {
 
+  //-- Dependencies ----------------------------------------------------------
+
+  @Inject
+  ApolloClient apolloClient;
+
+  //-- Operating fields -----------------------------------------------------
+
   MutableLiveData<GameQuery.Game> game;
+
+  //== Instantiation =========================================================
+
+  public GameViewModel() {
+    ViewModelComponent component = DaggerViewModelComponent.builder().build();
+    component.inject(this);
+  }
+
+
+  //== Instance methods ======================================================
 
   public LiveData<GameQuery.Game> getGame(String gameId) {
     if (game == null) {
@@ -29,17 +48,6 @@ public class GameViewModel extends ViewModel {
   }
 
   private void loadGame(String gameId) {
-    ApolloClient apolloClient =
-        ApolloClient.builder()
-            .serverUrl("https://www.gamerankr.com/graphql")
-            .logger(new Logger() {
-              @Override
-              public void log(int priority, @NotNull String message,
-                              @NotNull Optional<Throwable> t, @NotNull Object... args) {
-                Log.println(priority, "PopularGamesFrag", String.format(message, args));
-              }
-            })
-            .build();
 
     ApolloQueryCall<GameQuery.Data> query =
         apolloClient.query(

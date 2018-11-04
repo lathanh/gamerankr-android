@@ -33,6 +33,12 @@ android {
 }
 
 dependencies {
+    // 2.17-2.19 are incompatible with DataBinding: https://stackoverflow.com/questions/50594507
+    implementation 'com.google.dagger:dagger-android:2.16'
+    implementation 'com.google.dagger:dagger-android-support:2.16'
+    annotationProcessor 'com.google.dagger:dagger-android-processor:2.16'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
+
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

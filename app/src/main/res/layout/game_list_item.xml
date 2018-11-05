@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
             name="gameItem"
@@ -11,16 +12,15 @@
         android:orientation="horizontal"
         android:onClick="@{() -> gameItem.onClickListener()}">
 
-        <TextView
-            android:id="@+id/item_number"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:id="@+id/gameCoverArt"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:imageUrl="@{gameItem.coverImageUrl}"
             android:layout_margin="@dimen/text_margin"
-            android:textAppearance="?attr/textAppearanceListItem"
-            android:text="@{gameItem.id}"
             />
         <TextView
-            android:id="@+id/content"
+            android:id="@+id/gameTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"

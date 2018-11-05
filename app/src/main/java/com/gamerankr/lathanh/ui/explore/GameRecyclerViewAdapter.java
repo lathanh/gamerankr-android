@@ -59,12 +59,15 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
     public final String id;
     public final String title;
     public final String url;
+    public final String coverImageUrl;
 
-    public GameItem(GameRecyclerViewAdapter adapter, String id, String title, String url) {
+    public GameItem(GameRecyclerViewAdapter adapter, String id, String title, String url,
+                    String coverImageUrl) {
       this.adapter = adapter;
       this.id = id;
       this.title = title;
       this.url = url;
+      this.coverImageUrl = coverImageUrl;
     }
 
     public void onClickListener() {

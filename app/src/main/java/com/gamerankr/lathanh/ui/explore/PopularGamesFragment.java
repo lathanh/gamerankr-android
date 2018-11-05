@@ -82,7 +82,8 @@ public class PopularGamesFragment extends Fragment {
       public void onChanged(@Nullable List<GameBasic> gameBasics) {
         for (GameBasic game : gameBasics) {
           GameRecyclerViewAdapter.GameItem gameItem =
-              new GameRecyclerViewAdapter.GameItem(adapter, game.id(), game.title(), game.url());
+              new GameRecyclerViewAdapter.GameItem(adapter, game.id(), game.title(), game.url(),
+                  game.ports().get(0).small_image_url());
           popularGameItems.add(gameItem);
         }
 

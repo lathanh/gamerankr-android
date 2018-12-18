@@ -1,14 +1,12 @@
-package com.gamerankr.lathanh.ui.explore;
+package com.gamerankr.lathanh.ui.me;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,11 +22,14 @@ import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 import com.facebook.FacebookSdk;
 import com.gamerankr.fragment.GameBasic;
+import com.gamerankr.fragment.RankingWithGame;
 import com.gamerankr.lathanh.R;
 import com.gamerankr.lathanh.app.dagger2.components.DaggerViewModelComponent;
 import com.gamerankr.lathanh.app.dagger2.components.ViewModelComponent;
 import com.gamerankr.lathanh.app.dagger2.modules.BackendServiceModule;
-import com.gamerankr.queries.PopularGamesQuery;
+import com.gamerankr.lathanh.ui.explore.GameRecyclerViewAdapter;
+import com.gamerankr.lathanh.ui.explore.PopularGamesFragment;
+import com.gamerankr.queries.MyGamesQuery;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,12 +38,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-/**
- * A fragment for showing the list of popular games.
- */
-public class PopularGamesFragment extends Fragment {
+public class MyGamesFragment extends Fragment {
 
-  private InteractionListener interactionListener;
+  private PopularGamesFragment.InteractionListener interactionListener;
 
 
   //== Instantiation =========================================================
@@ -51,11 +49,9 @@ public class PopularGamesFragment extends Fragment {
    * Mandatory empty constructor for the fragment manager to instantiate the
    * fragment (e.g. upon screen orientation changes).
    */
-  public PopularGamesFragment() {
-  }
 
-  public static PopularGamesFragment newInstance() {
-    return new PopularGamesFragment();
+  public static MyGamesFragment newInstance() {
+    return new MyGamesFragment();
   }
 
 
@@ -67,29 +63,26 @@ public class PopularGamesFragment extends Fragment {
     View view = inflater.inflate(R.layout.fragment_popular_games, container, false);
 
     // Set the adapter
-    final List<GameRecyclerViewAdapter.GameItem> popularGameItems = new ArrayList<>();
+    final List<GameRecyclerViewAdapter.GameItem> gameItems = new ArrayList<>();
     Context context = view.getContext();
     RecyclerView recyclerView = (RecyclerView) view;
     recyclerView.setLayoutManager(new LinearLayoutManager(context));
     final GameRecyclerViewAdapter adapter =
-        new GameRecyclerViewAdapter(popularGameItems, interactionListener);
+        new GameRecyclerViewAdapter(gameItems, interactionListener);
     recyclerView.setAdapter(adapter);
 
     // Popular games view model
-    PopularGamesViewModel viewModel =
-        ViewModelProviders.of(this).get(PopularGamesViewModel.class);
-    viewModel.getPopularGames().observe(this, new Observer<List<GameBasic>>() {
-      @Override
-      public void onChanged(@Nullable List<GameBasic> gameBasics) {
-        for (GameBasic game : gameBasics) {
-          GameRecyclerViewAdapter.GameItem gameItem =
-              new GameRecyclerViewAdapter.GameItem(adapter, game.id(), game.title(), game.url(),
-                  game.ports().get(0).small_image_url());
-          popularGameItems.add(gameItem);
-        }
-
-        adapter.notifyDataSetChanged();
+    MyGamesViewModel viewModel =
+        ViewModelProviders.of(this).get(MyGamesViewModel.class);
+    viewModel.getMyGames().observe(this, gameBasics -> {
+      for (GameBasic game : gameBasics) {
+        GameRecyclerViewAdapter.GameItem gameItem =
+            new GameRecyclerViewAdapter.GameItem(adapter, game.id(), game.title(), game.url(),
+                game.ports().get(0).small_image_url());
+        gameItems.add(gameItem);
       }
+
+      adapter.notifyDataSetChanged();
     });
 
     return view;
@@ -98,10 +91,10 @@ public class PopularGamesFragment extends Fragment {
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
-    if (context instanceof InteractionListener) {
-      interactionListener = (InteractionListener) context;
+    if (context instanceof PopularGamesFragment.InteractionListener) {
+      interactionListener = (PopularGamesFragment.InteractionListener) context;
     } else {
-      Log.e("PopularGamesFrag", context.toString() + " must implement InteractionListener");
+      Log.e("MyGamesFrag", context.toString() + " must implement InteractionListener");
     }
   }
 
@@ -111,10 +104,9 @@ public class PopularGamesFragment extends Fragment {
     interactionListener = null;
   }
 
-
   //== Nested classes ========================================================
 
-  public static class PopularGamesViewModel extends ViewModel {
+  public static class MyGamesViewModel extends ViewModel {
 
     //-- Dependencies --------------------------------------------------------
 
@@ -127,10 +119,10 @@ public class PopularGamesFragment extends Fragment {
 
     //== Instantiation =======================================================
 
-    public PopularGamesViewModel() {
+    public MyGamesViewModel() {
       ViewModelComponent component =
           DaggerViewModelComponent.builder()
-              //todo-xxxx: fix this hacky way to get context
+              //todo-xxxx hacky way to get context
               .backendServiceModule(new BackendServiceModule(FacebookSdk.getApplicationContext()))
               .build();
       component.inject(this);
@@ -138,26 +130,27 @@ public class PopularGamesFragment extends Fragment {
 
     //== Instance methods ======================================================
 
-    public LiveData<List<GameBasic>> getPopularGames() {
+    public LiveData<List<GameBasic>> getMyGames() {
       if (games == null) {
         games = new MutableLiveData<>();
-        loadPopularGames();
+        loadMyGames();
       }
       return games;
     }
 
-    private void loadPopularGames() {
-      ApolloQueryCall<PopularGamesQuery.Data> query =
+    private void loadMyGames() {
+      ApolloQueryCall<MyGamesQuery.Data> query =
           apolloClient.query(
-              PopularGamesQuery.builder().build());
-      query.enqueue(new ApolloCall.Callback<PopularGamesQuery.Data>() {
+              MyGamesQuery.builder().build());
+      query.enqueue(new ApolloCall.Callback<MyGamesQuery.Data>() {
         @Override
-        public void onResponse(@NotNull Response<PopularGamesQuery.Data> response) {
-          List<PopularGamesQuery.Game> popularGames = response.data().games();
-          List<GameBasic> gameBasicList = new ArrayList<>(popularGames.size());
-          for (PopularGamesQuery.Game popularGame : popularGames) {
-            GameBasic game = popularGame.fragments().gameBasic();
-            gameBasicList.add(game);
+        public void onResponse(@NotNull Response<MyGamesQuery.Data> response) {
+          List<MyGamesQuery.Edge> myGames = response.data().my_games().edges();
+          List<GameBasic> gameBasicList = new ArrayList<>(myGames.size());
+
+          for (MyGamesQuery.Edge myGame : myGames) {
+            RankingWithGame.Game game = myGame.ranking().fragments().rankingWithGame().game();
+            gameBasicList.add(game.fragments().gameBasic());
           }
 
           games.postValue(gameBasicList);
@@ -166,23 +159,10 @@ public class PopularGamesFragment extends Fragment {
         @Override
         public void onFailure(@NotNull ApolloException e) {
           // TODO-XXXX
-          Log.e("PopularGamesFrag", "onFailure", e);
+          Log.e("MyGamesFrag", "onFailure", e);
         }
       });
-    } // loadPopularGames()
-  } // class PopularGamesViewModel
+    } // loadMyGames()
+  } // class MyGamesViewModel
 
-  /**
-   * This interface must be implemented by activities that contain this
-   * fragment to allow an interaction in this fragment to be communicated
-   * to the activity and potentially other fragments contained in that
-   * activity.
-   * <p/>
-   * See the Android Training lesson <a href=
-   * "http://developer.android.com/training/basics/fragments/communicating.html"
-   * >Communicating with Other Fragments</a> for more information.
-   */
-  public interface InteractionListener {
-    void onGameItemChosen(GameRecyclerViewAdapter.GameItem item);
-  }
 }

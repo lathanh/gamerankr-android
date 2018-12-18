@@ -2,5 +2,12 @@
     <string name="app_name">GameRankr</string>
     <string name="title_home">Home</string>
     <string name="title_explore">Explore</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_my_games">My Games</string>
+    <string name="title_activity_login">Sign in</string>
+
+    <string name="home_current_user">Current user: loading…</string>
+
+    <string name="login">Sign in</string>
+    <string name="logout">Sign out</string>
+
 </resources>

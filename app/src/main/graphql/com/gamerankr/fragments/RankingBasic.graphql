@@ -1,0 +1,19 @@
+fragment RankingBasic on Ranking {
+    id
+    ranking
+    review
+    verb
+    comments_count
+    url
+    shelves {
+        ...ShelfBasic
+    }
+    port {
+        id
+        platform {
+            id
+            name
+        }
+        small_image_url
+    }
+}

@@ -10,8 +10,10 @@ import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.ApolloQueryCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
+import com.facebook.FacebookSdk;
 import com.gamerankr.lathanh.app.dagger2.components.DaggerViewModelComponent;
 import com.gamerankr.lathanh.app.dagger2.components.ViewModelComponent;
+import com.gamerankr.lathanh.app.dagger2.modules.BackendServiceModule;
 import com.gamerankr.queries.GameQuery;
 
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +34,11 @@ public class GameViewModel extends ViewModel {
   //== Instantiation =========================================================
 
   public GameViewModel() {
-    ViewModelComponent component = DaggerViewModelComponent.builder().build();
+    ViewModelComponent component =
+        DaggerViewModelComponent.builder()
+            //todo-xxxx hacky way to get context
+            .backendServiceModule(new BackendServiceModule(FacebookSdk.getApplicationContext()))
+            .build();
     component.inject(this);
   }
 

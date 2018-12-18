@@ -1,0 +1,5 @@
+fragment UserBasic on User {
+    id
+    real_name
+    photo_url
+}

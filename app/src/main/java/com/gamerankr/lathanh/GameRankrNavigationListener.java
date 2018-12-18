@@ -6,7 +6,9 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.view.MenuItem;
 
+import com.gamerankr.lathanh.ui.authentication.LoginActivity;
 import com.gamerankr.lathanh.ui.explore.ExploreActivity;
+import com.gamerankr.lathanh.ui.me.MeActivity;
 
 public class GameRankrNavigationListener
     implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -28,7 +30,9 @@ public class GameRankrNavigationListener
         if (activity.getClass() != ExploreActivity.class)
           activity.startActivity(new Intent(activity, ExploreActivity.class));
         return true;
-      case R.id.navigation_notifications:
+      case R.id.navigation_me:
+        if (activity.getClass() != LoginActivity.class)
+          activity.startActivity(new Intent(activity, MeActivity.class));
         return true;
     }
     return false;
